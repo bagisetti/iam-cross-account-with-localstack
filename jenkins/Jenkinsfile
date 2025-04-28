@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_PROFILE = 'localstack'
+        AWS_REGION = 'us-east-1'
+        AWS_ACCESS_KEY_ID = 'test'
+        AWS_SCRET_ACCESS_KEY = 'test'
+        AWS_DEFAULT_REGION = 'us-east-1'
+    }
+
+    stages {
+        stage('Deploy Account A Role') {
+            steps {
+                sh '''
+                    echo "PWD is $PWD"
+                    echo "AWS_PROFILE is $AWS_PROFILE"
+                    echo "ls -al"
+
+                    aws cloudformation create-stack \
+                        --stack-name account-a-role \
+                        --template-body file://cloudformation/accountA-role.yaml                        
+                '''
+            }
+        }
+
+        stage('Deploy Account B User') {
+            steps {
+                sh '''
+                    aws cloudformation create-stack \
+                        --stack-name account-b-user \
+                        --template-body file://cloudformation/accountB-user.yaml
+                '''
+            }
+        }
+
+        stage('Deploy S3 Bucket') {
+            steps {
+                sh '''
+                    aws cloudformation create-stack \
+                        --stack-name cross-account-bucket \
+                        --template-body file://cloudformation/s3-bucket.yaml \
+                '''
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+#accountB-user.yaml (Creates a User that will AssumeRole):
+AWSTemplateFormatVersion: '2010-09-09'
+Description: User in Account B to assume role in Account A
+
+Resource:
+  AccountBUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: AccountBUser
+      Policies:
+        - PolicyName: AllowAssumeRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: "arn:aws:iam::000000000000:role/cross-account-access-role"

@@ -1,0 +1,9 @@
+#Create a bucket to access:
+Description: S3 bucket for cross-account testing. 
+
+Resource:
+  CrossAccountBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: cross-account-bucket
+      
