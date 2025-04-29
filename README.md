@@ -88,16 +88,15 @@ This uses temporary credentials to access the cross-account-test-bucket.
     1. Pass local timezone environment variable when running Jenkins Container:
         In `docker-compose.yaml` for Jenkins
 
-        ```bash
         services:
             jenkins:
                 ...
                 environment:
-                - TZ=America/New_York
+                    - TZ=America/New_York
                 volumes:
-                - /etc/localtime:/etc/localtime:ro
-                - /etc/timezone:/etc/timezone:ro
-        ```
+                    - /etc/localtime:/etc/localtime:ro
+                    - /etc/timezone:/etc/timezone:ro
+        
 
         ✅ TZ=America/New_York sets timezone inside container.
 
