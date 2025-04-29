@@ -1,0 +1,82 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = 'us-east-1'
+        AWS_ACCESS_KEY_ID = 'test'
+        AWS_SECRET_ACCESS_KEY = 'test'
+        AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_ENDPOINT = 'http://host.docker.internal:4566'
+    }
+
+    stages {
+        stage('Safe Directory') {
+            steps {
+                dir('/current-project/jenkins-workspace') {
+                    sh '''
+                        echo "Working inside safe jenkins-workspace"
+                        pwd
+                    '''
+                }
+            }
+        }
+        stage('Deploy Account A Role') {
+            steps {
+                echo "environement workspacke: ${env.WORKSPACE}"
+                dir('/current-project/jenkins-workspace') {
+                    //echo "Current directory: ${env.WORKSPACE}"
+
+                    sh '''
+                        echo "PWD is $PWD"
+                        echo "AWS_PROFILE is $AWS_PROFILE"
+
+                        aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
+                            --stack-name account-a-role \
+                            --template-body file:///current-project/cloudformation/accountA-role.yaml || \
+                        (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
+                            --stack-name account-a-role \
+                            --template-body file:///current-project/cloudformation/accountA-role.yaml \
+                            --capabilities CAPABILITY_NAMED_IAM || true)                     
+                    '''
+
+                }
+
+            }
+        }
+
+        stage('Deploy Account B User') {
+            steps {
+                dir('/current-project/jenkins-workspace') {
+                    sh '''
+                        echo "Deploying Account B User stack...."
+
+                        aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
+                            --stack-name account-b-user \
+                            --template-body file:///current-project/cloudformation/accountB-user.yaml || \
+                        (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
+                            --stack-name account-b-user \
+                            --template-body file:///current-project/cloudformation/accountB-user.yaml \
+                            --capabilities CAPABILITY_NAMED_IAM || true)
+                    '''
+                }
+
+            }
+        }
+
+        stage('Deploy S3 Bucket') {
+            steps {
+                dir('/current-project/jenkins-workspace') {
+                    sh '''
+                        aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
+                            --stack-name cross-account-bucket \
+                            --template-body file:///current-project/cloudformation/s3-bucket.yaml || \
+                        (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
+                            --stack-name cross-account-bucket \
+                            --template-body file:///current-project/cloudformation/s3-bucket.yaml \
+                            --capabilities CAPABILITY_NAMED_IAM || true)
+                    '''
+                }
+            }
+        }
+    }
+}

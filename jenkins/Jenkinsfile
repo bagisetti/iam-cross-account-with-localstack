@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        AWS_PROFILE = 'localstack'
         AWS_REGION = 'us-east-1'
         AWS_ACCESS_KEY_ID = 'test'
         AWS_SCRET_ACCESS_KEY = 'test'
         AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_ENDPOINT = 'http://host.docker.internal:4566'
     }
 
     stages {
@@ -15,11 +15,16 @@ pipeline {
                 sh '''
                     echo "PWD is $PWD"
                     echo "AWS_PROFILE is $AWS_PROFILE"
-                    echo "ls -al"
+                     ls -al
 
-                    aws cloudformation create-stack \
+                    aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
                         --stack-name account-a-role \
-                        --template-body file://cloudformation/accountA-role.yaml                        
+                        --template-body file://cloudformation/accountA-role.yaml  || \  
+
+                    (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
+                        --stack-name account-a-role \
+                        --template-body file://cloudformation/accountA-role.yaml \
+                        --capabilities CAPABILITY_NAMED_IAM || true)
                 '''
             }
         }
@@ -27,9 +32,14 @@ pipeline {
         stage('Deploy Account B User') {
             steps {
                 sh '''
-                    aws cloudformation create-stack \
+                    aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
                         --stack-name account-b-user \
-                        --template-body file://cloudformation/accountB-user.yaml
+                        --template-body file://cloudformation/accountB-user.yaml || \
+
+                    (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
+                        --stack-name account-b-user \
+                        --template-body file://cloudformation/accountB-user.yaml \
+                        --capabilities CAPABILITY_NAMED_IAM || true)
                 '''
             }
         }
@@ -37,9 +47,14 @@ pipeline {
         stage('Deploy S3 Bucket') {
             steps {
                 sh '''
-                    aws cloudformation create-stack \
+                    aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
+                        --stack-name cross-account-bucket \
+                        --template-body file://cloudformation/s3-bucket.yaml || \
+
+                    (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
                         --stack-name cross-account-bucket \
                         --template-body file://cloudformation/s3-bucket.yaml \
+                        --capabilities CAPABILITY_NAMED_IAM || true)
                 '''
             }
         }
