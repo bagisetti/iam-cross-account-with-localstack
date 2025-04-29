@@ -45,44 +45,50 @@ docker-compose up -d
 ```
 
 ## Step 3: Jenkins Configuration
-Open Jenkins (localhost:8080)
+- Open Jenkins (localhost:8080)
 
-Install basic plugins if prompted.
+- Install basic plugins if prompted.
 
-Create a simple pipeline project:
+- Create a simple pipeline project:
 
-Name: cross-account-iam-deploy
+- Name: cross-account-iam-deploy
 
-Point it to your jenkins/Jenkinsfile in this repository.
+- Point it to your jenkins/Jenkinsfile in this repository.
 
-Configure credentials/environment if necessary.
+- Configure credentials/environment if necessary.
 
 
 
 ## Step 4: CloudFormation Deployment (via Jenkins)
 Trigger the Jenkins pipeline. It will:
 
-Create an IAM Role (accountA-role.yaml)
+- Create an IAM Role (accountA-role.yaml)
 
-Create an IAM User (accountB-user.yaml)
+- Create an IAM User (accountB-user.yaml)
 
-Create an S3 Bucket (s3-bucket.yaml)
+- Create an S3 Bucket (s3-bucket.yaml)
 
-All deployments happen in LocalStack.
+- All deployments happen in LocalStack.
 
 
 ## Step 5: Assume Role and Access S3 (Testing)
-./scripts/assume-role.sh
 
-This uses sts:AssumeRole to get temporary credentials.
+1. Run the script to assume the IAM Role:
 
-Output saved into temp-creds.json.
+    ```bash
+    ./scripts/assume-role.sh
+    ```
 
-Next, test S3 access:
+    - This uses `sts:AssumeRole` to get temporary credentials.
+    - The output is saved into `temp-creds.json`.
 
-./scripts/test-s3-access.sh
+2. Test S3 access using the temporary credentials:
 
-This uses temporary credentials to access the cross-account-test-bucket.
+    ```bash
+    ./scripts/test-s3-access.sh
+    ```
+
+    - This script uses the temporary credentials to access the `cross-account-test-bucket`.
 
 ## To Force Jenkins container to use your local timezone
     1. Pass local timezone environment variable when running Jenkins Container:
