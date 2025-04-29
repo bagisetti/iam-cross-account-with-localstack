@@ -19,8 +19,7 @@ pipeline {
 
                     aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
                         --stack-name account-a-role \
-                        --template-body file://cloudformation/accountA-role.yaml  || \  
-
+                        --template-body file://cloudformation/accountA-role.yaml ||  
                     (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
                         --stack-name account-a-role \
                         --template-body file://cloudformation/accountA-role.yaml \
@@ -34,7 +33,7 @@ pipeline {
                 sh '''
                     aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
                         --stack-name account-b-user \
-                        --template-body file://cloudformation/accountB-user.yaml || \
+                        --template-body file://cloudformation/accountB-user.yaml || 
 
                     (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
                         --stack-name account-b-user \
@@ -49,7 +48,7 @@ pipeline {
                 sh '''
                     aws --endpoint-url=${AWS_ENDPOINT} cloudformation create-stack \
                         --stack-name cross-account-bucket \
-                        --template-body file://cloudformation/s3-bucket.yaml || \
+                        --template-body file://cloudformation/s3-bucket.yaml || 
 
                     (aws --endpoint-url=${AWS_ENDPOINT} cloudformation update-stack \
                         --stack-name cross-account-bucket \
