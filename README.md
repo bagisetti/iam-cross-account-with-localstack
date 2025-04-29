@@ -84,3 +84,24 @@ Next, test S3 access:
 
 This uses temporary credentials to access the cross-account-test-bucket.
 
+## To Force Jenkins container to use your local timezone
+    1. Pass local timezone environment variable when running Jenkins Container:
+        In `docker-compose.yaml` for Jenkins
+
+        ```bash
+        services:
+            jenkins:
+                ...
+                environment:
+                - TZ=America/New_York
+                volumes:
+                - /etc/localtime:/etc/localtime:ro
+                - /etc/timezone:/etc/timezone:ro
+        ```
+
+        ✅ TZ=America/New_York sets timezone inside container.
+
+        ✅ Mounting /etc/localtime and /etc/timezone ensures that Linux in container syncs with your host time settings.
+
+
+
